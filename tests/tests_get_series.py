@@ -1,23 +1,22 @@
+from http import HTTPStatus
+
 import pytest
 import requests
 import psycopg
-
-from config.api_config import BASE_URL
 from psycopg.rows import dict_row
-from http import HTTPStatus
 from jsonschema import validate
 
-from fixtures.api_fixtures import series_data, series_data_put
-from config.api_config import CONN_PARAMS
+from config.api_config import CONN_PARAMS, BASE_URL
 from helpers.file_helpers import load_yaml
 
 
 class TestGetSeries:
+    '''Тесты на проверку метода GET/series'''
     def test__get_series_by_rating(self, series_data):
         response = requests.get(
                    BASE_URL + "/series",
                    params={"rating": 7}
-                   )
+                               )
         assert response.status_code == HTTPStatus.OK
         body = response.json()
         for series in body:
@@ -53,8 +52,8 @@ class TestGetSeries:
         for series in range(len(body) - 1):
             assert body[series]["id"] < body[series + 1]["id"]
 
-#Спринт 11.3
-#Задание 2.Параметризация фикстуры
+# Спринт 11.3
+# Задание 2.Параметризация фикстуры
     @pytest.mark.parametrize(
         "series_data_get",
         [
@@ -69,15 +68,16 @@ class TestGetSeries:
         )
         assert response.status_code == HTTPStatus.OK
         body = response.json()
-        number = series_data_get # получаем из фикстуры количество строк, добавленных в БД
+        number = series_data_get  # получаем из фикстуры количество строк, добавленных в БД
         assert len(body) == number
         template = load_yaml("GetSeries.yml")
         validate(body, template)
 
 
-#Спринт 11.3
-#Задание 1.Параметризация теста
+# Спринт 11.3
+# Задание 1.Параметризация теста
 class TestPutSeries:
+    '''Параметризация теста PUT/series'''
     @pytest.mark.parametrize(
         "field_name, new_value",
         [
@@ -96,18 +96,12 @@ class TestPutSeries:
                    "review": "Новая заметка"}
         payload[field_name] = new_value
         response = requests.put(
-                   BASE_URL+"/series/"+str(series_id),
+                   BASE_URL + "/series/" + str(series_id),
                    json=payload
-                   )
+                               )
         assert response.status_code == HTTPStatus.OK
         with psycopg.connect(**CONN_PARAMS, row_factory=dict_row) as conn:
             with conn.cursor() as cur:
                 cur.execute("""SELECT * FROM series WHERE id = %s""", (series_id,))
                 row = cur.fetchone()
                 assert row[field_name] == new_value
-
-
-
-
-
-
