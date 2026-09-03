@@ -1,0 +1,13 @@
+# Виртуальное окружение
+venv/
+
+# Файлы, созданные IDE
+.idea
+
+__pycache__/
+*.pyc
+
+# Директории с результатами
+allure-result
+allure-report
+
