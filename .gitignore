@@ -7,3 +7,7 @@ venv/
 __pycache__/
 *.pyc
 
+# Директории с результатами
+allure-result
+allure-report
+
